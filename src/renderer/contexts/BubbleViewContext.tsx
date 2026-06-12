@@ -1,14 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { clippyApi } from "../clippyApi";
+import { useChat } from "./ChatContext";
 
 export type BubbleView =
-  | "chat"
-  | "chats"
+  | "speech"
   | "settings"
-  | "settings-general"
-  | "settings-model"
-  | "settings-parameters"
-  | "settings-advanced"
+  | "settings-appearance"
   | "settings-about";
 
 type BubbleViewContextType = {
@@ -23,18 +20,21 @@ const BubbleViewContext = createContext<BubbleViewContextType | undefined>(
 export const BubbleViewProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [currentView, setCurrentView] = useState<BubbleView>("chat");
+  const [currentView, setCurrentView] = useState<BubbleView>("speech");
+  const { setIsBubbleOpen } = useChat();
 
   useEffect(() => {
     clippyApi.offSetBubbleView();
     clippyApi.onSetBubbleView((view: BubbleView) => {
       setCurrentView(view);
+      // A view request from the menu (e.g. Settings) should pop the window open.
+      setIsBubbleOpen(true);
     });
 
     return () => {
       clippyApi.offSetBubbleView();
     };
-  }, []);
+  }, [setIsBubbleOpen]);
 
   return (
     <BubbleViewContext.Provider value={{ currentView, setCurrentView }}>

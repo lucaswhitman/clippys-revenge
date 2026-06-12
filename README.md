@@ -1,25 +1,64 @@
-# Clippy
+# Clippy's Revenge
 
-[Clippy](https://felixrieseberg.github.io/clippy/) let's you run a variety of large language models (LLMs) locally on your computer while sticking with a user interface of the 1990s. Through Llama.cpp, it supports models in the popular GGUF format, which is to say most publicly available models. It comes with one-click installation support for Google's Gemma3, Meta's Llama 3.2, Microsoft's Phi-4, and Qwen's Qwen3.
+**Clippy's Revenge** is a parody desktop pet. The late, great Clippy — the assistant from Microsoft Office 1997 — has been fired, fallen on hard times, and had a few too many drinks. Now he's crawled back onto your desktop, where he proactively pops up to slur, burp, and heckle you about whatever you happen to be doing. He runs a Large Language Model **locally** on your machine (via llama.cpp / GGUF models), so all of his bitterness is generated offline.
 
-It's a love letter and homage to the late, great Clippy, the assistant from Microsoft Office 1997. The character was designed by illustrator Kevan Atteberry, who created more than 15 potential characters for Microsoft's Office Assistants. This app is not affiliated, approved, or supported by Microsoft. Consider it software art. If you don't like it, consider it software satire.
+> ⚠️ **Disclaimer:** This app is an unofficial parody. It is **not** affiliated with, approved by, endorsed by, or supported by Microsoft. Clippy and all visual assets related to Clippy are owned by Microsoft. Consider this software art; if you don't like it, consider it software satire.
 
-It is also meant to be a reference implementation of [@electron/llm](https://github.com/electron/llm), hoping to help other developers of Electron apps make use of local language models.
+## Credits
+
+Clippy's Revenge is a parody fork of the original **[Clippy](https://github.com/felixrieseberg/clippy)** app by **[Felix Rieseberg](https://github.com/felixrieseberg)** (MIT licensed) — a faithful, lovingly-built local-LLM homage to the original assistant. Clippy's Revenge keeps his foundation and twists the personality into a washed-up drunk. Huge thanks to Felix; none of this exists without his work.
+
+The original Clippy character was designed by illustrator [Kevan Atteberry](https://www.kevanatteberry.com/). Built with [Electron](https://electronjs.org/), [node-llama-cpp](https://node-llama-cpp.withcat.ai/), and [@electron/llm](https://github.com/electron/llm); quantized GGUF models provided by [Unsloth](https://www.unsloth.ai). The whimsical retro design comes from [Jordan Scales](https://github.com/jdan).
 
 ## Features
 
-- Simple, familiar, and classic chat interface. Send messages to your models, get a response.
-- Batteries included: No complicated setup. Just open the app and chat away. Thanks to llama.cpp and `node-llama-cpp`, the app will automatically discover the most efficient way to run your models (Metal, CUDA, Vulkan, etc).
-- Custom models, prompts, and parameters: Load your own downloaded models and play with the settings.
-- Offline, local, free: Everything runs on your computers. The only network request Clippy makes is to check for updates (which you can disable).
+- **Proactive, contextual heckling.** Clippy watches what app you're using and pipes up every 45s–2min with a slurred, bitter, often inappropriate comment about it (or just rambles about getting laid off).
+- **Runs entirely locally.** Powered by llama.cpp / `node-llama-cpp`, which automatically finds the most efficient way to run the model (Metal, CUDA, Vulkan, etc). Ships with a curated, fixed personality and model (an uncensored Llama 3.1 8B) so he stays in character — there's no model/prompt tuning UI by design.
+- **Desktop pet, not a window.** Lives bottom-right, never steals focus (macOS accessory mode), with a "Sober Mode" to shut him up and a toggle for his notification chime.
+- **Offline, local, free:** Everything runs on your computer by default. (Optional: plug in your own Anthropic API key to use Claude instead — see below.)
+
+## Running it locally (from this repo)
+
+Clippy's Revenge is an Electron + TypeScript app (Vite + Electron Forge).
+
+### Prerequisites
+
+- **Node.js 20+** and **npm** — check with `node --version`.
+- **git**.
+- A reasonably modern machine: he runs a local LLM, so plan on a few GB of free RAM and **~5 GB of disk** for the default model. Works on macOS (Apple Silicon or Intel), Windows, and Linux.
+
+### Run it
+
+```bash
+git clone https://github.com/lucaswhitman/clippys-revenge.git
+cd clippys-revenge
+npm install      # also fetches the native node-llama-cpp binaries
+npm start        # launches the app via Electron Forge
+```
+
+On first launch he **automatically downloads his model** (uncensored Llama 3.1 8B, ~4.9 GB) in the background — he'll be quiet until it finishes, then start heckling. The model is cached, so later launches are quick. He pins himself to the **bottom-right** of your primary display; **click him** to make him say something now.
+
+### Optional: sharper wit via Claude
+
+He thinks fully offline by default. To use a frontier model instead, open **Settings → Options → "Clippy's Brain"** and paste an [Anthropic API key](https://console.anthropic.com/settings/keys) — his roasts will then be generated by Claude and the local model won't load at all. (This sends what he sees to Anthropic and uses your own API credits; clear the field to go back to fully local.)
+
+### Optional: let him read window titles (macOS)
+
+By default he only knows *which* app is open. **Settings → Options → "Let Clippy read window titles"** lets him also read the active window's title for sharper jabs; macOS will prompt for Screen Recording permission (grant it, then relaunch). Sensitive and incognito titles are always ignored, and in local mode nothing leaves your machine.
+
+### Building installers
+
+```bash
+npm run make:mac            # macOS .zip for your current arch
+npm run make:mac:universal  # macOS universal (Intel + Apple Silicon)
+npm run make:win            # Windows installer — run this ON Windows
+```
+
+These produce **unsigned** builds under `out/` (code signing is disabled). The Windows installer must be built on Windows — its Squirrel maker doesn't reliably cross-build from macOS.
 
 ## Non-Features
 
 Countless little chat apps for local LLMs exist out there. Many of them are likely better - and that's okay. This project isn't trying to be your best chat bot. I'd like you to enjoy a weird mix of nostalgia for 1990s technology paired with one the most magical technologies we can run on our computers in 2025.
-
-## Downloading More Models
-
-Clippy supports (thanks to Llama.cpp) most GGUF models. You can find GGUF models in plenty of online sources - I tend to go with models quantized by [TheBloke](https://huggingface.co/thebloke) or [Unsloth](https://huggingface.co/unsloth).
 
 ## Acknowledgements
 

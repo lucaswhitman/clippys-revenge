@@ -103,7 +103,9 @@ const config: ForgeConfig = {
   },
   packagerConfig: {
     asar: {
-      unpack: "**/node_modules/*node-llama-cpp*/**",
+      // get-windows ships a helper binary that must be executable on disk,
+      // so it (like node-llama-cpp) can't live inside the asar archive.
+      unpack: "**/node_modules/{*node-llama-cpp*,get-windows}/**",
     },
     ignore: (file) => {
       const filePath = file.toLowerCase().replace(/\\/g, "/");
@@ -198,11 +200,11 @@ const config: ForgeConfig = {
 
       return true;
     },
-    appBundleId: "com.felixrieseberg.clippy",
+    appBundleId: "com.lucaswhitman.clippysrevenge",
     appCategoryType: "public.app-category.productivity",
     win32metadata: {
-      CompanyName: "Felix Rieseberg",
-      OriginalFilename: "Clippy",
+      CompanyName: "Lucas Whitman",
+      OriginalFilename: "Clippy's Revenge",
     },
     osxSign: FLAGS.IS_CODESIGNING_ENABLED
       ? {
@@ -229,15 +231,17 @@ const config: ForgeConfig = {
   makers: [
     new MakerSquirrel(
       (arch) => ({
-        name: "Clippy",
-        authors: "Felix Rieseberg",
-        exe: "Clippy.exe",
+        // NuGet package id — must stay alphanumeric (no spaces/apostrophes),
+        // while the on-disk app/exe uses the productName "Clippy's Revenge".
+        name: "ClippysRevenge",
+        authors: "Lucas Whitman",
+        exe: "Clippy's Revenge.exe",
         noMsi: true,
         remoteReleases: "",
         iconUrl:
           "https://raw.githubusercontent.com/felixrieseberg/windows95/master/assets/icon.ico",
         loadingGif: "./assets/boot.gif",
-        setupExe: `Clippy-${packageJson.version}-setup-${arch}.exe`,
+        setupExe: `ClippysRevenge-${packageJson.version}-setup-${arch}.exe`,
         setupIcon: path.resolve(__dirname, "assets", "icon.ico"),
         windowsSign: FLAGS.IS_CODESIGNING_ENABLED ? windowsSign : undefined,
       }),
@@ -486,7 +490,9 @@ function getArch() {
   // If we're running in CI, we want to use the arch passed in
   // If someone is passing in a flag, we want to use that, too
   if (process.env.CI || process.argv.some((s) => s.includes("arch"))) {
-    return process.argv.some((s) => s.includes("--arch=arm64")) ? "arm64" : "x64";
+    return process.argv.some((s) => s.includes("--arch=arm64"))
+      ? "arm64"
+      : "x64";
   }
 
   return process.arch;

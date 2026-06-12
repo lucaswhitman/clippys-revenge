@@ -11,9 +11,9 @@ import { FileTransport } from "electron-log";
 import { getStateManager } from "./state";
 
 import type { BubbleView } from "../renderer/contexts/BubbleViewContext";
-import { getMainWindow, toggleChatWindow } from "./windows";
+import { getMainWindow } from "./windows";
 import { IpcMessages } from "../ipc-messages";
-import { checkForUpdates } from "./update";
+import { roastNow } from "./roaster";
 import {
   closeInspector,
   getIsInspectorEnabled,
@@ -65,14 +65,7 @@ export function getMainAppMenu(): Menu {
     const appMenu = menu.getMenuItemById("appMenu");
     appMenu?.submenu?.insert(2, new MenuItem({ type: "separator" }));
     appMenu?.submenu?.insert(3, getSettingsMenuItem());
-    appMenu?.submenu?.insert(
-      4,
-      new MenuItem({
-        label: "Check for Updates…",
-        click: () => checkForUpdates(),
-      }),
-    );
-    appMenu?.submenu?.insert(5, new MenuItem({ type: "separator" }));
+    appMenu?.submenu?.insert(4, new MenuItem({ type: "separator" }));
   }
 
   // Insert window options
@@ -93,26 +86,33 @@ export function getMainAppMenu(): Menu {
   );
   windowMenu?.submenu?.append(
     new MenuItem({
-      label: "Always Show Chat Window on Top",
-      type: "checkbox",
-      checked: getStateManager().store.get("settings").chatAlwaysOnTop,
-      click: (menuItem) => {
-        getStateManager().store.set(
-          "settings.chatAlwaysOnTop",
-          menuItem.checked,
-        );
-      },
-    }),
-  );
-  windowMenu?.submenu?.append(
-    new MenuItem({
       type: "separator",
     }),
   );
   windowMenu?.submenu?.append(
     new MenuItem({
-      label: "Toggle Chat Window",
-      click: () => toggleChatWindow(),
+      label: "Sober Mode (shut him up)",
+      type: "checkbox",
+      checked: getStateManager().store.get("settings").soberMode,
+      click: (menuItem) => {
+        getStateManager().store.set("settings.soberMode", menuItem.checked);
+      },
+    }),
+  );
+  windowMenu?.submenu?.append(
+    new MenuItem({
+      label: "Play Sound When Clippy Speaks",
+      type: "checkbox",
+      checked: getStateManager().store.get("settings").soundEnabled !== false,
+      click: (menuItem) => {
+        getStateManager().store.set("settings.soundEnabled", menuItem.checked);
+      },
+    }),
+  );
+  windowMenu?.submenu?.append(
+    new MenuItem({
+      label: "Say Something",
+      click: () => roastNow(),
       accelerator: "Cmd+`",
     }),
   );
@@ -121,29 +121,15 @@ export function getMainAppMenu(): Menu {
 }
 
 function getFileMenu(): MenuItemConstructorOptions[] {
-  const template: MenuItemConstructorOptions[] = [
-    {
-      label: "New Chat",
-      accelerator: "CmdOrCtrl+N",
-      click: () => {
-        getMainWindow()?.webContents.send(IpcMessages.CHAT_NEW_CHAT);
-      },
-    },
-    { role: "close" },
-  ];
+  const template: MenuItemConstructorOptions[] = [{ role: "close" }];
 
   if (process.platform === "win32") {
     template.push(
       { type: "separator" },
       {
         label: "Settings",
-        click: () => openView("settings-general"),
+        click: () => openView("settings-appearance"),
         accelerator: "CmdOrCtrl+,",
-      },
-      { type: "separator" },
-      {
-        label: "Check for Updates…",
-        click: () => checkForUpdates(),
       },
     );
   }
@@ -154,12 +140,8 @@ function getFileMenu(): MenuItemConstructorOptions[] {
 function getViewMenu(): MenuItemConstructorOptions[] {
   return [
     {
-      label: "Chat",
-      click: () => openView("chat"),
-    },
-    {
-      label: "Chat History",
-      click: () => openView("chats"),
+      label: "Settings",
+      click: () => openView("settings-appearance"),
     },
     { type: "separator" },
     { role: "toggleDevTools" },
@@ -175,21 +157,9 @@ function getSettingsMenuItem(): MenuItem {
     label: "Settings",
     submenu: Menu.buildFromTemplate([
       {
-        label: "General",
-        click: () => openView("settings-general"),
+        label: "Options",
+        click: () => openView("settings-appearance"),
         accelerator: "CmdOrCtrl+,",
-      },
-      {
-        label: "Model",
-        click: () => openView("settings-model"),
-      },
-      {
-        label: "Parameters",
-        click: () => openView("settings-parameters"),
-      },
-      {
-        label: "Advanced",
-        click: () => openView("settings-advanced"),
       },
       {
         label: "About",
@@ -202,15 +172,23 @@ function getSettingsMenuItem(): MenuItem {
 function getHelpMenu(): MenuItemConstructorOptions[] {
   return [
     {
-      label: "Open Clippy Website",
+      label: "Clippy's Revenge on GitHub",
       click: () => {
-        shell.openExternal("https://felixrieseberg.github.io/clippy/");
+        shell.openExternal("https://github.com/lucaswhitman/clippys-revenge");
       },
     },
     {
       label: "Report an Issue",
       click: () => {
-        shell.openExternal("https://github.com/felixrieseberg/clippy/issues");
+        shell.openExternal(
+          "https://github.com/lucaswhitman/clippys-revenge/issues",
+        );
+      },
+    },
+    {
+      label: "Based on Clippy by Felix Rieseberg",
+      click: () => {
+        shell.openExternal("https://github.com/felixrieseberg/clippy");
       },
     },
     {
